@@ -1,0 +1,52 @@
+-- Storage bucket + policies for private attachments.
+--
+-- IMPORTANT:
+-- In many Supabase projects you cannot run `create policy` on `storage.objects` from the SQL editor
+-- (you may see: `ERROR: 42501: must be owner of table objects`).
+--
+-- Use the Dashboard instead:
+-- 1) Storage → Buckets → Create bucket: `attachments` (Private)
+-- 2) Storage → Policies → `storage.objects` → New policy (use the expressions below)
+--
+-- Reference policy expressions (bucket_id = 'attachments'):
+--
+-- READ (authenticated):
+--   USING (
+--     bucket_id = 'attachments'
+--     AND (
+--       split_part(name, '/', 1) = auth.uid()::text
+--       OR exists (
+--         select 1
+--         from public.events e
+--         where e.status = 'PUBLISHED'
+--           and (
+--             (e.flyer->>'objectPath') = name
+--             or exists (select 1 from jsonb_array_elements(e.images) img where img->>'objectPath' = name)
+--             or exists (select 1 from jsonb_array_elements(e.documents) doc where doc->>'objectPath' = name)
+--           )
+--       )
+--       OR exists (
+--         select 1
+--         from public.projects p
+--         where p.status = 'PUBLISHED'
+--           and (
+--             (p.cover_image->>'objectPath') = name
+--             or exists (select 1 from jsonb_array_elements(p.images) img where img->>'objectPath' = name)
+--             or exists (select 1 from jsonb_array_elements(p.documents) doc where doc->>'objectPath' = name)
+--           )
+--       )
+--     )
+--   )
+--
+-- INSERT (staff only, own folder):
+--   WITH CHECK (
+--     bucket_id = 'attachments'
+--     AND public.is_staff(auth.uid())
+--     AND split_part(name, '/', 1) = auth.uid()::text
+--   )
+--
+-- DELETE (own folder):
+--   USING (
+--     bucket_id = 'attachments'
+--     AND split_part(name, '/', 1) = auth.uid()::text
+--   )
