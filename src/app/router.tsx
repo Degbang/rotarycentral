@@ -1,14 +1,20 @@
+import { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AppShell } from '@/app/shell';
 import { RequireAuth, RequirePermission, useAuth } from '@/features/auth';
-import { AccessDeniedPage } from '@/pages/access-denied';
-import { EventDetailPage } from '@/pages/event-detail';
-import { EventEditorPage } from '@/pages/event-editor';
-import { EventsPage } from '@/pages/events';
-import { LoginPage } from '@/pages/login';
-import { ProjectDetailPage } from '@/pages/project-detail';
-import { ProjectEditorPage } from '@/pages/project-editor';
-import { ProjectsPage } from '@/pages/projects';
+
+const AppShell = lazy(async () => ({ default: (await import('@/app/shell')).AppShell }));
+const AccessDeniedPage = lazy(async () => ({ default: (await import('@/pages/access-denied')).AccessDeniedPage }));
+const EventDetailPage = lazy(async () => ({ default: (await import('@/pages/event-detail')).EventDetailPage }));
+const EventEditorPage = lazy(async () => ({ default: (await import('@/pages/event-editor')).EventEditorPage }));
+const EventsPage = lazy(async () => ({ default: (await import('@/pages/events')).EventsPage }));
+const LoginPage = lazy(async () => ({ default: (await import('@/pages/login')).LoginPage }));
+const ProjectDetailPage = lazy(async () => ({ default: (await import('@/pages/project-detail')).ProjectDetailPage }));
+const ProjectEditorPage = lazy(async () => ({ default: (await import('@/pages/project-editor')).ProjectEditorPage }));
+const ProjectsPage = lazy(async () => ({ default: (await import('@/pages/projects')).ProjectsPage }));
+
+function RouteLoader({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<div className="auth-loading">Loading your workspace...</div>}>{children}</Suspense>;
+}
 
 function RootRedirect() {
   const { session, isBootstrapping } = useAuth();
@@ -22,17 +28,27 @@ function RootRedirect() {
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <RouteLoader>
+        <LoginPage />
+      </RouteLoader>
+    ),
   },
   {
     path: '/access-denied',
-    element: <AccessDeniedPage />,
+    element: (
+      <RouteLoader>
+        <AccessDeniedPage />
+      </RouteLoader>
+    ),
   },
   {
     path: '/',
     element: (
       <RequireAuth>
-        <AppShell />
+        <RouteLoader>
+          <AppShell />
+        </RouteLoader>
       </RequireAuth>
     ),
     children: [
@@ -42,13 +58,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'events',
-        element: <EventsPage />,
+        element: (
+          <RouteLoader>
+            <EventsPage />
+          </RouteLoader>
+        ),
       },
       {
         path: 'events/new',
         element: (
           <RequirePermission permission="staff.access">
-            <EventEditorPage />
+            <RouteLoader>
+              <EventEditorPage />
+            </RouteLoader>
           </RequirePermission>
         ),
       },
@@ -56,23 +78,35 @@ export const router = createBrowserRouter([
         path: 'events/:eventId/edit',
         element: (
           <RequirePermission permission="staff.access">
-            <EventEditorPage />
+            <RouteLoader>
+              <EventEditorPage />
+            </RouteLoader>
           </RequirePermission>
         ),
       },
       {
         path: 'events/:eventId',
-        element: <EventDetailPage />,
+        element: (
+          <RouteLoader>
+            <EventDetailPage />
+          </RouteLoader>
+        ),
       },
       {
         path: 'projects',
-        element: <ProjectsPage />,
+        element: (
+          <RouteLoader>
+            <ProjectsPage />
+          </RouteLoader>
+        ),
       },
       {
         path: 'projects/new',
         element: (
           <RequirePermission permission="staff.access">
-            <ProjectEditorPage />
+            <RouteLoader>
+              <ProjectEditorPage />
+            </RouteLoader>
           </RequirePermission>
         ),
       },
@@ -80,13 +114,19 @@ export const router = createBrowserRouter([
         path: 'projects/:projectId/edit',
         element: (
           <RequirePermission permission="staff.access">
-            <ProjectEditorPage />
+            <RouteLoader>
+              <ProjectEditorPage />
+            </RouteLoader>
           </RequirePermission>
         ),
       },
       {
         path: 'projects/:projectId',
-        element: <ProjectDetailPage />,
+        element: (
+          <RouteLoader>
+            <ProjectDetailPage />
+          </RouteLoader>
+        ),
       },
       { path: 'home', element: <Navigate replace to="/events" /> },
       { path: 'clubs', element: <Navigate replace to="/events" /> },

@@ -26,6 +26,7 @@ export function EventsPage() {
   const eventsQuery = useQuery({ queryKey: ['events', session?.user.id], queryFn: () => listEvents(session!), enabled: Boolean(session) });
   const clubsQuery = useQuery({ queryKey: ['clubs'], queryFn: listClubs });
   const themesQuery = useQuery({ queryKey: ['themes'], queryFn: listThemes });
+  const isLoading = eventsQuery.isLoading || clubsQuery.isLoading || themesQuery.isLoading;
 
   const filtered = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -245,7 +246,31 @@ export function EventsPage() {
       </Card>
 
       <Card>
-        {filtered.length === 0 ? (
+        {eventsQuery.isError ? (
+          <div className="callout-warning" role="alert">
+            <strong>Unable to load events</strong>
+            <p className="muted">
+              {eventsQuery.error instanceof Error ? eventsQuery.error.message : 'Please refresh and try again.'}
+            </p>
+          </div>
+        ) : isLoading ? (
+          <div className="card-grid" aria-label="Loading events">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <article className="card skeleton-card" key={index}>
+                <div className="skeleton skeleton-card-media" />
+                <div className="skeleton-card-body">
+                  <div className="inline-badges">
+                    <span className="skeleton skeleton-pill" style={{ width: 110 }} />
+                    <span className="skeleton skeleton-pill" style={{ width: 140 }} />
+                  </div>
+                  <div className="skeleton skeleton-line-lg" style={{ width: '82%' }} />
+                  <div className="skeleton skeleton-line" style={{ width: '66%' }} />
+                  <div className="skeleton skeleton-line" style={{ width: '54%' }} />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState title="No events found" description="Adjust your search or filters and try again." />
         ) : (
           <div className="card-grid" aria-label="Event results">

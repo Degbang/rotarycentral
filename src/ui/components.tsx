@@ -329,6 +329,86 @@ export function Stepper({
   );
 }
 
+export function InlineSearchSelectField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+  emptyLabel = 'No matches found.',
+}: {
+  label: string;
+  value?: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  placeholder: string;
+  error?: string;
+  emptyLabel?: string;
+}) {
+  const selected = options.find((option) => option.value === value) ?? null;
+  const [query, setQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options.slice(0, 12);
+    return options.filter((option) => option.label.toLowerCase().includes(q)).slice(0, 24);
+  }, [options, query]);
+
+  return (
+    <Field label={label} error={error}>
+      <div className="inline-picker">
+        <div className="inline-picker-input">
+          <Search size={18} aria-hidden="true" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={placeholder}
+            aria-label={`${label} search`}
+          />
+          {query ? (
+            <button className="icon-button" type="button" aria-label="Clear search" onClick={() => setQuery('')}>
+              <X size={16} />
+            </button>
+          ) : null}
+        </div>
+
+        {selected ? (
+          <div className="inline-picker-selected" aria-label="Selected option">
+            <span className="badge badge-gold">Selected</span>
+            <strong>{selected.label}</strong>
+          </div>
+        ) : (
+          <p className="muted inline-picker-hint">Start typing, then tap a club to select it.</p>
+        )}
+
+        <div className="inline-picker-list" role="listbox" aria-label={`${label} options`}>
+          {filtered.length === 0 ? (
+            <div className="dialog-empty muted">{emptyLabel}</div>
+          ) : (
+            filtered.map((option) => {
+              const isSelected = option.value === value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  className="inline-picker-option"
+                  onClick={() => onChange(option.value)}
+                >
+                  <span>{option.label}</span>
+                  {isSelected ? <Check size={16} aria-hidden="true" /> : null}
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </Field>
+  );
+}
+
 export function UserPill({ name, detail }: { name: string; detail: string }) {
   const initials = name
     .split(' ')

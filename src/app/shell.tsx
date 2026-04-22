@@ -1,8 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CalendarDays, FolderKanban, Moon, Plus, Sun } from 'lucide-react';
+import { CalendarDays, FolderKanban, Plus } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { useTheme } from '@/features/theme';
 import { Button, UserPill } from '@/ui/components';
 import districtLogo from '@/assets/rd9104-logo.png';
 import { InstallButton } from '@/ui/install-button';
@@ -14,7 +13,6 @@ const baseNavigation = [
 
 export function AppShell() {
   const { session, logout, hasPermission } = useAuth();
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,8 +34,8 @@ export function AppShell() {
               <img className="brand-logo" src={districtLogo} alt="" />
             </span>
             <div className="brand-copy">
-              <span className="eyebrow">District platform</span>
-              <strong>Rotary Ghana</strong>
+              <span className="eyebrow">Rotary District 9104</span>
+              <strong>Ghana</strong>
             </div>
           </button>
           <nav className="topnav" aria-label="Primary">
@@ -83,10 +81,6 @@ export function AppShell() {
               <DropdownMenu.Content className="menu-content" align="end" sideOffset={8}>
                 <DropdownMenu.Item className="menu-item" onSelect={() => navigate('/events')}>
                   Go to events
-                </DropdownMenu.Item>
-                <DropdownMenu.Item className="menu-item" onSelect={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                  {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                  Toggle theme
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="menu-separator" />
                 <DropdownMenu.Item

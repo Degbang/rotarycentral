@@ -26,6 +26,7 @@ export function ProjectsPage() {
   const projectsQuery = useQuery({ queryKey: ['projects', session?.user.id], queryFn: () => listProjects(session!), enabled: Boolean(session) });
   const clubsQuery = useQuery({ queryKey: ['clubs'], queryFn: listClubs });
   const themesQuery = useQuery({ queryKey: ['themes'], queryFn: listThemes });
+  const isLoading = projectsQuery.isLoading || clubsQuery.isLoading || themesQuery.isLoading;
 
   const filtered = useMemo(() => {
     return (projectsQuery.data ?? []).filter((project) => {
@@ -242,7 +243,31 @@ export function ProjectsPage() {
       </Card>
 
       <Card>
-        {filtered.length === 0 ? (
+        {projectsQuery.isError ? (
+          <div className="callout-warning" role="alert">
+            <strong>Unable to load projects</strong>
+            <p className="muted">
+              {projectsQuery.error instanceof Error ? projectsQuery.error.message : 'Please refresh and try again.'}
+            </p>
+          </div>
+        ) : isLoading ? (
+          <div className="card-grid" aria-label="Loading projects">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <article className="card skeleton-card" key={index}>
+                <div className="skeleton skeleton-card-media" />
+                <div className="skeleton-card-body">
+                  <div className="inline-badges">
+                    <span className="skeleton skeleton-pill" style={{ width: 110 }} />
+                    <span className="skeleton skeleton-pill" style={{ width: 140 }} />
+                  </div>
+                  <div className="skeleton skeleton-line-lg" style={{ width: '82%' }} />
+                  <div className="skeleton skeleton-line" style={{ width: '66%' }} />
+                  <div className="skeleton skeleton-line" style={{ width: '54%' }} />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState title="No projects found" description="Adjust your search or filters and try again." />
         ) : (
           <div className="card-grid" aria-label="Project results">

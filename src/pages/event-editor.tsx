@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { EventEditorInput, RecordStatus } from '@/data/model';
+import { EventEditorInput } from '@/data/model';
 import { getEventById, listClubs, listThemes, saveEvent } from '@/data/api';
 import { useAuth } from '@/features/auth';
 import { clubNameIsIncluded, titleUsesRotaryWords } from '@/features/brandRules';
 import { canEditEvent } from '@/features/permissions';
-import { Button, Card, Field, MetaList, PageHeader, SearchSelectField, SelectField, StatusBadge, Stepper, TextArea, TextInput } from '@/ui/components';
+import { Button, Card, Field, InlineSearchSelectField, MetaList, PageHeader, SelectField, StatusBadge, Stepper, TextArea, TextInput } from '@/ui/components';
 import { UploadField } from '@/ui/upload-field';
 import { formatDateTimeLabel } from '@/ui/formatters';
 
@@ -124,7 +124,7 @@ export function EventEditorPage() {
   }, [eventQuery.data, reset]);
 
   const mutation = useMutation({
-    mutationFn: ({ values, status }: { values: EventEditorInput; status: RecordStatus }) => saveEvent(session!, values, status, eventId),
+    mutationFn: (values: EventEditorInput) => saveEvent(session!, values, 'PUBLISHED', eventId),
     onSuccess: async (record) => {
       await queryClient.invalidateQueries({ queryKey: ['events'] });
       await queryClient.invalidateQueries({ queryKey: ['event', record.id] });
@@ -161,32 +161,8 @@ export function EventEditorPage() {
     return null;
   }
 
-  function buildDraftPayload(): EventEditorInput {
-    const raw = getValues();
-    return {
-      ...raw,
-      title: raw.title || 'Untitled event draft',
-      clubId: raw.clubId || activeSession.clubIds[0] || clubsQuery.data?.[0]?.id || '',
-      themeId: raw.themeId || themesQuery.data?.[0]?.id || '',
-      date: raw.date || new Date().toISOString().slice(0, 10),
-      location: raw.location || 'Location to be confirmed',
-      description: raw.description || 'Draft description to be updated before review.',
-      contactPerson: raw.contactPerson || activeSession.user.displayName,
-      images: raw.images ?? [],
-      documents: raw.documents ?? [],
-      flyer: raw.flyer ?? null,
-      isAllDay: Boolean(raw.isAllDay),
-      time: raw.time,
-    };
-  }
-
-  async function saveAs(status: RecordStatus) {
+  async function savePublished() {
     try {
-      if (status === 'DRAFT') {
-        await mutation.mutateAsync({ values: buildDraftPayload(), status });
-        return;
-      }
-
       const publishValues = {
         ...getValues(),
         contactPerson: (getValues().contactPerson || activeSession.user.displayName).trim(),
@@ -199,11 +175,8 @@ export function EventEditorPage() {
         return;
       }
 
-      if (status === 'PUBLISHED') {
-        // Brand naming rules + required fields are enforced above for a hard publish block.
-      }
-
-      await mutation.mutateAsync({ values: publishValues, status });
+      // Brand naming rules + required fields are enforced above for a hard publish block.
+      await mutation.mutateAsync(publishValues);
     } catch (error) {
       setError('root', { message: error instanceof Error ? error.message : 'Unable to save event.' });
     }
@@ -260,11 +233,11 @@ export function EventEditorPage() {
 
         {currentStep === 1 ? (
           <div className="form-stack">
-            <SearchSelectField
+            <InlineSearchSelectField
               label="Club"
               value={values.clubId}
               onChange={(value) => setValue('clubId', value, { shouldValidate: true })}
-              placeholder="Choose club"
+              placeholder="Search clubs (start typing...)"
               error={errors.clubId?.message}
               options={(clubsQuery.data ?? []).map((club) => ({ value: club.id, label: club.name }))}
             />
@@ -367,19 +340,16 @@ export function EventEditorPage() {
             ) : null}
           </div>
           <div className="inline-actions">
-            <Button type="button" variant="ghost" onClick={() => void saveAs('DRAFT')} disabled={isSubmitting || mutation.isPending}>
-              Save draft
-            </Button>
             {currentStep === steps.length - 1 ? (
               <>
                 {hasPermission('event.publish') ? (
                   <Button
                     type="button"
-                    onClick={() => void saveAs('PUBLISHED')}
+                    onClick={() => void savePublished()}
                     disabled={mutation.isPending || Boolean(publishBlockerReason(getValues() as EventEditorInput))}
                     title={publishBlockerReason(getValues() as EventEditorInput) ?? undefined}
                   >
-                    Publish
+                    {isEditing ? 'Save changes' : 'Publish'}
                   </Button>
                 ) : null}
               </>

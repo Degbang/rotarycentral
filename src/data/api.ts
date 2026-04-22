@@ -204,6 +204,7 @@ function parseAttachments(raw: unknown): StoredAttachment[] {
       category: item.category === 'pdf' ? 'pdf' : 'image',
       bucket: item.bucket ? String(item.bucket) : undefined,
       objectPath: item.objectPath ? String(item.objectPath) : undefined,
+      dataUrl: item.dataUrl ? String(item.dataUrl) : undefined,
       uploadedAt: String(item.uploadedAt),
     }));
 }
@@ -215,8 +216,12 @@ function parseAttachment(raw: unknown): StoredAttachment | null {
 }
 
 function stripSignedUrl(attachment: StoredAttachment): StoredAttachment {
-  const { dataUrl, ...rest } = attachment;
-  return rest;
+  if (attachment.bucket && attachment.objectPath) {
+    const { dataUrl, ...rest } = attachment;
+    return rest;
+  }
+
+  return attachment;
 }
 
 export async function getCurrentSession(): Promise<SessionPayload | null> {
@@ -403,17 +408,27 @@ export async function uploadAttachment(file: File, kind: 'flyer' | 'cover' | 'im
     }
   }
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  if (!data.user) throw new Error('You need to sign in again.');
+  // Use the locally available auth session (no network call) to avoid "Auth session missing" during uploads.
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const authSession = sessionData.session;
+  if (!authSession?.user) {
+    throw new Error('Your session has expired. Please sign in again and retry the upload.');
+  }
 
   const bucket = 'attachments';
-  const objectPath = `${data.user.id}/${kind}/${crypto.randomUUID()}-${sanitizeFilename(uploadFile.name)}`;
+  const objectPath = `${authSession.user.id}/${kind}/${crypto.randomUUID()}-${sanitizeFilename(uploadFile.name)}`;
   const uploadResult = await supabase.storage.from(bucket).upload(objectPath, uploadFile, {
     contentType: uploadFile.type,
     upsert: false,
   });
-  if (uploadResult.error) throw uploadResult.error;
+  if (uploadResult.error) {
+    const message = String((uploadResult.error as any)?.message ?? uploadResult.error);
+    if (message.toLowerCase().includes('auth session missing') || message.toLowerCase().includes('jwt')) {
+      throw new Error('Upload failed because your session is missing or expired. Please sign in again and retry.');
+    }
+    throw uploadResult.error;
+  }
 
   const { data: signed } = await supabase.storage.from(bucket).createSignedUrl(objectPath, SIGNED_URL_TTL_SECONDS);
   const uploadedAt = new Date().toISOString();

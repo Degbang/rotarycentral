@@ -13,6 +13,15 @@ function isIos(): boolean {
   return isAppleMobile || isIpadOs;
 }
 
+function isIosSafari(): boolean {
+  if (!isIos()) return false;
+  const ua = navigator.userAgent.toLowerCase();
+  // iOS Safari includes "safari" but not the iOS browser markers below.
+  if (!ua.includes('safari')) return false;
+  const nonSafariMarkers = ['crios', 'fxios', 'edgios', 'opios', 'gsa', 'fbav', 'instagram', 'line', 'wv'];
+  return !nonSafariMarkers.some((marker) => ua.includes(marker));
+}
+
 function isInStandaloneMode(): boolean {
   // iOS Safari uses navigator.standalone; other browsers may expose display-mode.
   return (
@@ -41,7 +50,9 @@ export function useInstallPrompt() {
   }, []);
 
   const canPrompt = useMemo(() => Boolean(deferred) && !installed, [deferred, installed]);
-  const showIosHint = useMemo(() => isIos() && !installed, [installed]);
+  const ios = useMemo(() => isIos(), []);
+  const iosSafari = useMemo(() => isIosSafari(), []);
+  const showIosHint = useMemo(() => ios && !installed, [installed, ios]);
 
   async function promptInstall() {
     if (!deferred) return;
@@ -53,6 +64,5 @@ export function useInstallPrompt() {
     }
   }
 
-  return { canPrompt, showIosHint, promptInstall };
+  return { canPrompt, showIosHint, ios, iosSafari, promptInstall };
 }
-

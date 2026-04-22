@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { ProjectEditorInput, RecordStatus } from '@/data/model';
+import { ProjectEditorInput } from '@/data/model';
 import { getProjectById, listClubs, listThemes, saveProject } from '@/data/api';
 import { useAuth } from '@/features/auth';
 import { clubNameIsIncluded, titleUsesRotaryWords } from '@/features/brandRules';
 import { canEditProject } from '@/features/permissions';
-import { Button, Card, Field, MetaList, PageHeader, SearchSelectField, SelectField, StatusBadge, Stepper, TextArea, TextInput } from '@/ui/components';
+import { Button, Card, Field, InlineSearchSelectField, MetaList, PageHeader, SelectField, StatusBadge, Stepper, TextArea, TextInput } from '@/ui/components';
 import { UploadField } from '@/ui/upload-field';
 import { formatDateLabel, formatStatusLabel } from '@/ui/formatters';
 
@@ -117,7 +117,7 @@ export function ProjectEditorPage() {
   }, [projectQuery.data, reset]);
 
   const mutation = useMutation({
-    mutationFn: ({ values, status }: { values: ProjectEditorInput; status: RecordStatus }) => saveProject(session!, values, status, projectId),
+    mutationFn: (values: ProjectEditorInput) => saveProject(session!, values, 'PUBLISHED', projectId),
     onSuccess: async (record) => {
       await queryClient.invalidateQueries({ queryKey: ['projects'] });
       await queryClient.invalidateQueries({ queryKey: ['project', record.id] });
@@ -154,30 +154,8 @@ export function ProjectEditorPage() {
     return null;
   }
 
-  function buildDraftPayload(): ProjectEditorInput {
-    const raw = getValues();
-    return {
-      ...raw,
-      title: raw.title || 'Untitled project draft',
-      clubId: raw.clubId || activeSession.clubIds[0] || clubsQuery.data?.[0]?.id || '',
-      themeId: raw.themeId || themesQuery.data?.[0]?.id || '',
-      projectStatus: raw.projectStatus || 'Planning',
-      startDate: raw.startDate || new Date().toISOString().slice(0, 10),
-      location: raw.location || 'Location to be confirmed',
-      description: raw.description || 'Draft project summary to be updated before review.',
-      images: raw.images ?? [],
-      documents: raw.documents ?? [],
-      coverImage: raw.coverImage ?? null,
-    };
-  }
-
-  async function saveAs(status: RecordStatus) {
+  async function savePublished() {
     try {
-      if (status === 'DRAFT') {
-        await mutation.mutateAsync({ values: buildDraftPayload(), status });
-        return;
-      }
-
       const publishValues = getValues() as ProjectEditorInput;
       const reason = publishBlockerReason(publishValues);
       if (reason) {
@@ -186,7 +164,7 @@ export function ProjectEditorPage() {
         return;
       }
 
-      await mutation.mutateAsync({ values: publishValues, status });
+      await mutation.mutateAsync(publishValues);
     } catch (error) {
       setError('root', { message: error instanceof Error ? error.message : 'Unable to save project.' });
     }
@@ -240,11 +218,11 @@ export function ProjectEditorPage() {
 
         {currentStep === 1 ? (
           <div className="form-stack">
-            <SearchSelectField
+            <InlineSearchSelectField
               label="Club"
               value={values.clubId}
               onChange={(value) => setValue('clubId', value, { shouldValidate: true })}
-              placeholder="Choose club"
+              placeholder="Search clubs (start typing...)"
               error={errors.clubId?.message}
               options={(clubsQuery.data ?? []).map((club) => ({ value: club.id, label: club.name }))}
             />
@@ -351,19 +329,16 @@ export function ProjectEditorPage() {
             ) : null}
           </div>
           <div className="inline-actions">
-            <Button type="button" variant="ghost" onClick={() => void saveAs('DRAFT')} disabled={isSubmitting || mutation.isPending}>
-              Save draft
-            </Button>
             {currentStep === steps.length - 1 ? (
               <>
                 {hasPermission('project.publish') ? (
                   <Button
                     type="button"
-                    onClick={() => void saveAs('PUBLISHED')}
+                    onClick={() => void savePublished()}
                     disabled={mutation.isPending || Boolean(publishBlockerReason(getValues() as ProjectEditorInput))}
                     title={publishBlockerReason(getValues() as ProjectEditorInput) ?? undefined}
                   >
-                    Publish
+                    {isEditing ? 'Save changes' : 'Publish'}
                   </Button>
                 ) : null}
               </>
