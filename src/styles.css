@@ -715,6 +715,118 @@ span {
   }
 }
 
+@media (min-width: 980px) and (max-height: 900px) {
+  .login-panel {
+    padding: 1rem 1.25rem;
+  }
+
+  .hero {
+    padding: 2.5rem 2rem;
+  }
+
+  .hero-content {
+    width: min(500px, 100%);
+    gap: 1.25rem;
+  }
+
+  .hero-top {
+    gap: 0.8rem;
+  }
+
+  .hero-wheel {
+    width: 48px;
+    height: 48px;
+  }
+
+  .hero-rotary {
+    font-size: 1.7rem;
+  }
+
+  .hero-district,
+  .hero-tagline {
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+  }
+
+  .hero-divider {
+    height: 42px;
+    margin: 0 0.5rem;
+  }
+
+  .hero-head {
+    gap: 0.8rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.8rem, 4.6vw, 3.7rem);
+  }
+
+  .hero-desc {
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  .hero-highlight {
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  .hero-badge {
+    padding: 0.32rem 0.7rem;
+    font-size: 0.54rem;
+  }
+
+  .login-form-shell {
+    max-width: 500px;
+  }
+
+  .login-form-card {
+    border-radius: 18px;
+    padding: 1.75rem 2rem;
+  }
+
+  .login-form-title {
+    font-size: 1.7rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .login-field {
+    gap: 0.25rem;
+  }
+
+  .login-hint {
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  .input-field {
+    height: 50px;
+    padding: 0 15px;
+  }
+
+  .sign-btn {
+    height: 54px;
+    font-size: 1rem;
+  }
+
+  .login-cta {
+    gap: 0.85rem;
+  }
+
+  .login-install-note {
+    gap: 0.45rem;
+  }
+
+  .login-install-note p,
+  .login-footer {
+    font-size: 0.66rem;
+  }
+
+  .login-footer {
+    margin-top: 0.7rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-orb-a,
   .hero-orb-b,
@@ -1183,17 +1295,6 @@ span {
 .sidebar-footer {
   display: grid;
   gap: 1rem;
-}
-
-.theme-panel {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.theme-actions {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
 }
 
 .shell-content {
@@ -2095,8 +2196,7 @@ span {
   }
 
   .inline-actions,
-  .page-header-actions,
-  .theme-actions {
+  .page-header-actions {
     width: 100%;
   }
 
