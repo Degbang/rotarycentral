@@ -1,5 +1,5 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CalendarDays, FolderKanban, Plus } from 'lucide-react';
+import { CalendarDays, FolderKanban, Megaphone, Plus } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { Button, UserPill } from '@/ui/components';
@@ -9,6 +9,7 @@ import { InstallButton } from '@/ui/install-button';
 const baseNavigation = [
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
+  { to: '/announcements', label: 'Announcements', icon: Megaphone },
 ];
 
 export function AppShell() {
@@ -65,6 +66,9 @@ export function AppShell() {
                   </DropdownMenu.Item>
                   <DropdownMenu.Item className="menu-item" onSelect={() => navigate('/projects/new')}>
                     Create project
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item className="menu-item" onSelect={() => navigate('/announcements/new')}>
+                    Post announcement
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Portal>

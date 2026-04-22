@@ -11,6 +11,8 @@ const LoginPage = lazy(async () => ({ default: (await import('@/pages/login')).L
 const ProjectDetailPage = lazy(async () => ({ default: (await import('@/pages/project-detail')).ProjectDetailPage }));
 const ProjectEditorPage = lazy(async () => ({ default: (await import('@/pages/project-editor')).ProjectEditorPage }));
 const ProjectsPage = lazy(async () => ({ default: (await import('@/pages/projects')).ProjectsPage }));
+const AnnouncementsPage = lazy(async () => ({ default: (await import('@/pages/announcements')).AnnouncementsPage }));
+const AnnouncementEditorPage = lazy(async () => ({ default: (await import('@/pages/announcement-editor')).AnnouncementEditorPage }));
 
 function RouteLoader({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<div className="auth-loading">Loading your workspace...</div>}>{children}</Suspense>;
@@ -55,6 +57,34 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <RootRedirect />,
+      },
+      {
+        path: 'announcements',
+        element: (
+          <RouteLoader>
+            <AnnouncementsPage />
+          </RouteLoader>
+        ),
+      },
+      {
+        path: 'announcements/new',
+        element: (
+          <RequirePermission permission="staff.access">
+            <RouteLoader>
+              <AnnouncementEditorPage />
+            </RouteLoader>
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'announcements/:announcementId/edit',
+        element: (
+          <RequirePermission permission="staff.access">
+            <RouteLoader>
+              <AnnouncementEditorPage />
+            </RouteLoader>
+          </RequirePermission>
+        ),
       },
       {
         path: 'events',

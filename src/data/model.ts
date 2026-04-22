@@ -88,6 +88,20 @@ export interface ProjectRecord {
   changeNote?: string;
 }
 
+export type AnnouncementScope = 'DISTRICT' | 'CLUB';
+
+export interface AnnouncementRecord {
+  id: string;
+  title: string;
+  body: string;
+  scope: AnnouncementScope;
+  clubId?: string | null;
+  status: RecordStatus;
+  ownerUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SessionPayload {
   user: {
     id: string;
@@ -133,4 +147,11 @@ export interface ProjectEditorInput {
   coverImage?: StoredAttachment | null;
   images: StoredAttachment[];
   documents: StoredAttachment[];
+}
+
+export interface AnnouncementEditorInput {
+  title: string;
+  body: string;
+  scope: AnnouncementScope;
+  clubId?: string | null;
 }

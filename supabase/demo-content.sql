@@ -425,3 +425,63 @@ on conflict (id) do update set
   documents = excluded.documents,
   updated_at = now();
 
+with staff_user as (
+  select id
+  from public.profiles
+  where email = 'staff@districtgh.org'
+  limit 1
+)
+insert into public.announcements (
+  id,
+  title,
+  body,
+  scope,
+  club_id,
+  status,
+  owner_user_id
+)
+values
+  (
+    '30000000-0000-0000-0000-000000000001',
+    'District Assembly: Monthly Fellowship',
+    'This month’s district fellowship is scheduled for Saturday 24 May 2026 at 10:00. Please arrive early for registration.\n\nDress code: Rotary pins encouraged.',
+    'DISTRICT',
+    null,
+    'PUBLISHED',
+    (select id from staff_user)
+  ),
+  (
+    '30000000-0000-0000-0000-000000000002',
+    'Club Reminder: Event Flyer Submission',
+    'Kindly upload your event flyer and basic details at least 7 days before the event date so it appears in the district calendar.',
+    'DISTRICT',
+    null,
+    'PUBLISHED',
+    (select id from staff_user)
+  ),
+  (
+    '30000000-0000-0000-0000-000000000003',
+    'Legon Rotaract: Volunteer Call',
+    'Volunteers needed for the literacy book drive this weekend. Please confirm your availability by Friday evening.',
+    'CLUB',
+    '33333333-3333-3333-3333-333333333333',
+    'PUBLISHED',
+    (select id from staff_user)
+  ),
+  (
+    '30000000-0000-0000-0000-000000000004',
+    'Kumasi Premier: Meeting Update',
+    'This week’s club meeting starts at 6:00pm (new time). Venue remains the Lancaster Hotel meeting room.',
+    'CLUB',
+    '22222222-2222-2222-2222-222222222222',
+    'PUBLISHED',
+    (select id from staff_user)
+  )
+on conflict (id) do update set
+  title = excluded.title,
+  body = excluded.body,
+  scope = excluded.scope,
+  club_id = excluded.club_id,
+  status = excluded.status,
+  owner_user_id = excluded.owner_user_id,
+  updated_at = now();

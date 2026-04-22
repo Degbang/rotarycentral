@@ -145,7 +145,7 @@ span {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--action-primary);
+  color: var(--rotary-gold);
 }
 
 .button {
@@ -170,28 +170,30 @@ span {
 .button-primary {
   background: var(--action-primary);
   color: var(--text-inverse);
+  border-color: var(--rotary-gold);
 }
 
 .button-primary:hover {
-  background: var(--action-primary-hover);
+  background: var(--action-primary);
+  box-shadow: inset 0 0 0 2px var(--rotary-gold);
 }
 
 .button-secondary {
-  background: var(--bg-surface-subtle);
-  border-color: var(--border-default);
-  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-color: var(--action-primary);
+  color: var(--action-primary);
 }
 
 .button-secondary:hover,
 .button-ghost:hover {
-  border-color: var(--action-secondary);
-  color: var(--text-primary);
+  border-color: var(--rotary-gold);
+  color: var(--action-primary);
 }
 
 .button-ghost {
   background: transparent;
-  border-color: var(--border-default);
-  color: var(--text-primary);
+  border-color: var(--action-primary);
+  color: var(--action-primary);
 }
 
 .button-danger {
@@ -714,6 +716,7 @@ span {
     padding-inline: 2.5rem;
   }
 }
+
 
 @media (min-width: 980px) and (max-height: 900px) {
   .login-panel {
@@ -1310,8 +1313,9 @@ span {
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: var(--bg-app);
-  border-bottom: 1px solid var(--border-default);
+  background: var(--rotary-royal-blue);
+  border-bottom: 0;
+  color: var(--rotary-white);
 }
 
 .topbar::after {
@@ -1345,6 +1349,7 @@ span {
   text-align: left;
   min-height: 44px;
   max-width: 420px;
+  color: var(--rotary-white);
 }
 
 .brand-mark {
@@ -1370,6 +1375,7 @@ span {
 .brand-copy strong {
   font-size: 1.05rem;
   line-height: 1.2;
+  color: var(--rotary-white);
 }
 
 .topnav {
@@ -1377,7 +1383,7 @@ span {
   align-items: center;
   gap: 0.35rem;
   padding-left: 0.25rem;
-  border-left: 1px solid var(--border-default);
+  border-left: 1px solid var(--rotary-gold);
 }
 
 .topnav-link {
@@ -1387,14 +1393,14 @@ span {
   min-height: 44px;
   padding: 0 0.9rem;
   border-radius: 999px;
-  color: var(--text-muted);
+  color: var(--rotary-white);
   border: 1px solid transparent;
 }
 
 .topnav-link-active {
-  background: var(--bg-surface-subtle);
-  border-color: var(--action-primary);
-  color: var(--action-primary);
+  background: var(--rotary-white);
+  border-color: var(--rotary-gold);
+  color: var(--rotary-royal-blue);
   font-weight: 700;
 }
 
@@ -1402,6 +1408,7 @@ span {
   border: 0;
   background: transparent;
   padding: 0;
+  color: var(--rotary-white);
 }
 
 .user-pill {
@@ -1427,9 +1434,9 @@ span {
 }
 
 .avatar-fallback {
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-default);
-  color: var(--action-primary);
+  background: var(--rotary-white);
+  border: 1px solid var(--rotary-gold);
+  color: var(--rotary-royal-blue);
   font-weight: 700;
 }
 
@@ -1486,6 +1493,11 @@ span {
   gap: 0.35rem;
 }
 
+.page-header h1,
+.section-head h2 {
+  color: var(--rotary-royal-blue);
+}
+
 .page-header-actions,
 .inline-actions,
 .inline-badges {
@@ -1508,21 +1520,21 @@ span {
   min-height: 40px;
   padding: 0 0.85rem;
   border-radius: 999px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--action-primary);
   background: var(--bg-surface);
-  color: var(--text-primary);
+  color: var(--action-primary);
   font-weight: 700;
   transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
 .filter-chip:hover {
-  border-color: var(--action-primary);
+  border-color: var(--rotary-gold);
 }
 
 .filter-chip-active {
-  border-color: transparent;
-  background: var(--action-primary);
-  color: var(--text-inverse);
+  border-color: var(--rotary-gold);
+  background: var(--rotary-gold);
+  color: var(--rotary-royal-blue);
 }
 
 .filter-chip-active:hover {
@@ -1543,7 +1555,7 @@ span {
   min-height: 40px;
   padding: 0 0.9rem;
   border-radius: 999px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--action-primary);
   background: var(--bg-surface);
 }
 
@@ -1616,10 +1628,11 @@ span {
   display: grid;
   gap: 0;
   transition: border-color 120ms ease;
+  border-top: 3px solid var(--rotary-royal-blue);
 }
 
 .content-card:hover {
-  border-color: var(--action-primary);
+  border-color: var(--rotary-gold);
 }
 
 .content-card-media {
@@ -1707,11 +1720,15 @@ span {
 }
 
 .badge-success {
-  color: var(--success);
+  background: var(--rotary-white);
+  border-color: var(--rotary-royal-blue);
+  color: var(--rotary-royal-blue);
 }
 
 .badge-warning {
-  color: var(--warning);
+  background: var(--rotary-gold);
+  border-color: var(--rotary-gold);
+  color: var(--rotary-royal-blue);
 }
 
 .badge-danger {
@@ -1719,13 +1736,13 @@ span {
 }
 
 .badge-brand {
-  background: var(--rotary-powder-blue);
-  border-color: var(--rotary-sky-blue);
-  color: var(--rotary-royal-blue);
+  background: var(--rotary-royal-blue);
+  border-color: var(--rotary-gold);
+  color: var(--rotary-white);
 }
 
 .badge-gold {
-  background: var(--bg-surface);
+  background: var(--rotary-gold);
   border-color: var(--rotary-gold);
   color: var(--rotary-royal-blue);
 }
@@ -1738,9 +1755,9 @@ span {
 }
 
 .club-card-mark {
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-default);
-  color: var(--action-primary);
+  background: var(--rotary-royal-blue);
+  border: 1px solid var(--rotary-gold);
+  color: var(--rotary-white);
   font-weight: 700;
 }
 
@@ -1766,7 +1783,7 @@ span {
 
 .callout-brand {
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: var(--rotary-white);
   border: 1px solid var(--rotary-gold);
   padding: 0.9rem 1rem;
 }
@@ -1853,8 +1870,8 @@ span {
 }
 
 .step-item-active {
-  border-color: var(--action-primary);
-  box-shadow: inset 0 0 0 1px var(--action-primary);
+  border-color: var(--rotary-gold);
+  box-shadow: inset 0 0 0 1px var(--rotary-gold);
 }
 
 .step-number {
@@ -1863,9 +1880,9 @@ span {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-default);
-  color: var(--action-primary);
+  background: var(--rotary-white);
+  border: 1px solid var(--rotary-gold);
+  color: var(--rotary-royal-blue);
   font-weight: 700;
 }
 

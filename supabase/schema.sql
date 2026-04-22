@@ -98,6 +98,22 @@ create table if not exists public.projects (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.announcements (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  body text not null,
+  scope text not null check (scope in ('DISTRICT','CLUB')),
+  club_id uuid references public.clubs(id),
+  status record_status not null default 'PUBLISHED',
+  owner_user_id uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  check (
+    (scope = 'DISTRICT' and club_id is null)
+    or (scope = 'CLUB' and club_id is not null)
+  )
+);
+
 create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
 begin
@@ -126,6 +142,10 @@ drop trigger if exists set_projects_updated_at on public.projects;
 create trigger set_projects_updated_at before update on public.projects
 for each row execute procedure public.set_updated_at();
 
+drop trigger if exists set_announcements_updated_at on public.announcements;
+create trigger set_announcements_updated_at before update on public.announcements
+for each row execute procedure public.set_updated_at();
+
 create or replace function public.is_staff(uid uuid)
 returns boolean language sql stable as $$
   select exists (
@@ -141,6 +161,7 @@ alter table public.clubs enable row level security;
 alter table public.themes enable row level security;
 alter table public.events enable row level security;
 alter table public.projects enable row level security;
+alter table public.announcements enable row level security;
 
 -- Profiles
 drop policy if exists "profiles read own" on public.profiles;
@@ -203,6 +224,26 @@ with check (public.is_staff(auth.uid()) and owner_user_id = auth.uid());
 
 drop policy if exists "projects update owner or staff" on public.projects;
 create policy "projects update owner or staff" on public.projects
+for update to authenticated
+using (owner_user_id = auth.uid())
+with check (owner_user_id = auth.uid());
+
+-- Announcements
+drop policy if exists "announcements read published or owner" on public.announcements;
+create policy "announcements read published or owner" on public.announcements
+for select to authenticated
+using (
+  status = 'PUBLISHED'
+  or owner_user_id = auth.uid()
+);
+
+drop policy if exists "announcements insert staff" on public.announcements;
+create policy "announcements insert staff" on public.announcements
+for insert to authenticated
+with check (public.is_staff(auth.uid()) and owner_user_id = auth.uid());
+
+drop policy if exists "announcements update owner" on public.announcements;
+create policy "announcements update owner" on public.announcements
 for update to authenticated
 using (owner_user_id = auth.uid())
 with check (owner_user_id = auth.uid());

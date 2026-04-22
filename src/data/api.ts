@@ -1,5 +1,7 @@
 import { supabase } from '@/data/supabaseClient';
 import {
+  AnnouncementEditorInput,
+  AnnouncementRecord,
   ClubRecord,
   EventEditorInput,
   EventRecord,
@@ -60,6 +62,18 @@ type DbProjectRow = {
   cover_image: unknown | null;
   images: unknown;
   documents: unknown;
+  created_at: string;
+  updated_at: string;
+};
+
+type DbAnnouncementRow = {
+  id: string;
+  title: string;
+  body: string;
+  scope: 'DISTRICT' | 'CLUB';
+  club_id: string | null;
+  status: RecordStatus;
+  owner_user_id: string;
   created_at: string;
   updated_at: string;
 };
@@ -356,6 +370,20 @@ async function hydrateProject(row: DbProjectRow): Promise<ProjectRecord> {
   };
 }
 
+function hydrateAnnouncement(row: DbAnnouncementRow): AnnouncementRecord {
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    scope: row.scope,
+    clubId: row.club_id,
+    status: row.status,
+    ownerUserId: row.owner_user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export async function listEvents(_session: SessionPayload): Promise<EventRecord[]> {
   const { data, error } = await supabase.from('events').select('*').order('date');
   if (error) throw error;
@@ -370,6 +398,13 @@ export async function listProjects(_session: SessionPayload): Promise<ProjectRec
   return Promise.all(rows.map(hydrateProject));
 }
 
+export async function listAnnouncements(_session: SessionPayload): Promise<AnnouncementRecord[]> {
+  const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+  if (error) throw error;
+  const rows = (data ?? []) as DbAnnouncementRow[];
+  return rows.map(hydrateAnnouncement);
+}
+
 export async function getEventById(_session: SessionPayload, eventId: string): Promise<EventRecord> {
   const { data, error } = await supabase.from('events').select('*').eq('id', eventId).maybeSingle();
   if (error) throw error;
@@ -382,6 +417,13 @@ export async function getProjectById(_session: SessionPayload, projectId: string
   if (error) throw error;
   if (!data) throw new Error('That project is not available.');
   return hydrateProject(data as DbProjectRow);
+}
+
+export async function getAnnouncementById(_session: SessionPayload, announcementId: string): Promise<AnnouncementRecord> {
+  const { data, error } = await supabase.from('announcements').select('*').eq('id', announcementId).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('That announcement is not available.');
+  return hydrateAnnouncement(data as DbAnnouncementRow);
 }
 
 export async function uploadAttachment(file: File, kind: 'flyer' | 'cover' | 'image' | 'pdf'): Promise<StoredAttachment> {
@@ -519,4 +561,36 @@ export async function saveProject(
   if (error) throw error;
   if (!data) throw new Error('The project could not be created.');
   return hydrateProject(data as DbProjectRow);
+}
+
+export async function saveAnnouncement(
+  session: SessionPayload,
+  input: AnnouncementEditorInput,
+  announcementId?: string,
+): Promise<AnnouncementRecord> {
+  const payload = {
+    title: input.title.trim(),
+    body: input.body.trim(),
+    scope: input.scope,
+    club_id: input.scope === 'CLUB' ? input.clubId ?? null : null,
+    status: 'PUBLISHED' as RecordStatus,
+    owner_user_id: session.user.id,
+  };
+
+  if (announcementId) {
+    const { data, error } = await supabase
+      .from('announcements')
+      .update(payload)
+      .eq('id', announcementId)
+      .select('*')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error('The announcement could not be saved.');
+    return hydrateAnnouncement(data as DbAnnouncementRow);
+  }
+
+  const { data, error } = await supabase.from('announcements').insert(payload).select('*').maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('The announcement could not be created.');
+  return hydrateAnnouncement(data as DbAnnouncementRow);
 }
