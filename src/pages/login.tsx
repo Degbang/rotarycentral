@@ -50,8 +50,8 @@ export function LoginPage() {
                 <div className="hero-district">District 9104</div>
               </div>
               <div className="hero-divider" aria-hidden="true" />
-              <div className="hero-tagline" aria-label="Unite for good">
-                Unite<br />For<br />Good
+              <div className="hero-tagline" aria-label="Service Above Self">
+                Service<br />Above<br />Self
               </div>
             </div>
 
@@ -69,7 +69,9 @@ export function LoginPage() {
             </p>
 
             <p className="hero-highlight fade-r-4">
-              Sign in to browse what’s happening across the district. Staff can create and manage events and projects.
+              Sign in to browse what’s happening across District 9104.
+              <br />
+              District and Club representatives can create and manage events and projects.
             </p>
 
             <div className="hero-badge fade-r-5">Ghana · District 9104</div>
@@ -158,7 +160,7 @@ export function LoginPage() {
             </form>
           </div>
 
-          <div className="login-footer fade-up-5">© 2026 Rotary District 9104 · Ghana</div>
+          <div className="login-footer fade-up-5">© 2026 Berecons</div>
         </div>
       </section>
     </div>
