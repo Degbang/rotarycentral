@@ -4,6 +4,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useNavigate } from 'react-router-dom';
 import { Check, Search } from 'lucide-react';
 import { listAnnouncements, listClubs } from '@/data/api';
+import { DISTRICT_CLUB_SHORT_NAME } from '@/data/model';
 import { useAuth } from '@/features/auth';
 import { hasPermission } from '@/features/permissions';
 import { Badge, Button, Card, EmptyState, FilterChip, PageHeader } from '@/ui/components';
@@ -38,7 +39,7 @@ export function AnnouncementsPage() {
           : level === 'district'
             ? announcement.scope === 'DISTRICT'
             : announcement.scope === 'CLUB';
-      const matchesClub = clubId === 'all' ? true : announcement.clubId === clubId;
+      const matchesClub = level === 'district' ? true : clubId === 'all' ? true : announcement.clubId === clubId;
       return matchesSearch && matchesLevel && matchesClub;
     });
   }, [announcementsQuery.data, clubId, level, search]);
@@ -69,14 +70,21 @@ export function AnnouncementsPage() {
             <DropdownMenu.Trigger asChild>
               <FilterChip label="Level" value={levelLabel} active={level !== 'all'} />
             </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content className="menu-content" align="start" sideOffset={8}>
-                <DropdownMenu.RadioGroup value={level} onValueChange={(value) => setLevel(value as LevelFilter)}>
-                  {[
-                    { value: 'all', label: 'All announcements' },
-                    { value: 'district', label: 'District announcements' },
-                    { value: 'club', label: 'Club announcements' },
-                  ].map((option) => (
+	          <DropdownMenu.Portal>
+	            <DropdownMenu.Content className="menu-content" align="start" sideOffset={8}>
+	                <DropdownMenu.RadioGroup
+	                  value={level}
+	                  onValueChange={(value) => {
+	                    const nextLevel = value as LevelFilter;
+	                    setLevel(nextLevel);
+	                    if (nextLevel === 'district') setClubId('all');
+	                  }}
+	                >
+	                  {[
+	                    { value: 'all', label: 'All announcements' },
+	                    { value: 'district', label: 'District announcements' },
+	                    { value: 'club', label: 'Club announcements' },
+	                  ].map((option) => (
                     <DropdownMenu.RadioItem className="menu-item" value={option.value} key={option.value}>
                       {option.label}
                       <DropdownMenu.ItemIndicator>
@@ -99,68 +107,71 @@ export function AnnouncementsPage() {
             />
           </div>
 
-          <DropdownMenu.Root
-            open={clubOpen}
-            onOpenChange={(nextOpen) => {
-              setClubOpen(nextOpen);
-              if (!nextOpen) setClubQuery('');
-            }}
-          >
-            <DropdownMenu.Trigger asChild>
-              <FilterChip label="Club" value={clubLabel} active={clubId !== 'all'} />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content className="menu-content" align="start" sideOffset={8}>
-                <DropdownMenu.Item className="menu-item" onSelect={(event) => event.preventDefault()} asChild>
-                  <div className="menu-search">
-                    <Search size={16} aria-hidden="true" />
-                    <input
-                      autoFocus
-                      value={clubQuery}
-                      onChange={(event) => setClubQuery(event.target.value)}
-                      placeholder="Search clubs..."
-                      aria-label="Search clubs"
-                    />
-                  </div>
-                </DropdownMenu.Item>
-                <div className="menu-scroll" aria-label="Club options">
-                  <DropdownMenu.RadioGroup value={clubId} onValueChange={setClubId}>
-                    <DropdownMenu.RadioItem className="menu-item" value="all">
-                      All clubs
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={16} />
-                      </DropdownMenu.ItemIndicator>
-                    </DropdownMenu.RadioItem>
-                    {(clubsQuery.data ?? [])
-                      .filter((club) => club.name.toLowerCase().includes(clubQuery.trim().toLowerCase()))
-                      .map((club) => (
-                        <DropdownMenu.RadioItem className="menu-item" value={club.id} key={club.id}>
-                          {club.shortName}
-                          <DropdownMenu.ItemIndicator>
-                            <Check size={16} />
-                          </DropdownMenu.ItemIndicator>
-                        </DropdownMenu.RadioItem>
-                      ))}
-                  </DropdownMenu.RadioGroup>
-                </div>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+	          {level !== 'district' ? (
+	            <DropdownMenu.Root
+	              open={clubOpen}
+	              onOpenChange={(nextOpen) => {
+	                setClubOpen(nextOpen);
+	                if (!nextOpen) setClubQuery('');
+	              }}
+	            >
+	              <DropdownMenu.Trigger asChild>
+	                <FilterChip label="Club" value={clubLabel} active={clubId !== 'all'} />
+	              </DropdownMenu.Trigger>
+	              <DropdownMenu.Portal>
+	                <DropdownMenu.Content className="menu-content" align="start" sideOffset={8}>
+	                  <DropdownMenu.Item className="menu-item" onSelect={(event) => event.preventDefault()} asChild>
+	                    <div className="menu-search">
+	                      <Search size={16} aria-hidden="true" />
+	                      <input
+	                        autoFocus
+	                        value={clubQuery}
+	                        onChange={(event) => setClubQuery(event.target.value)}
+	                        placeholder="Search clubs..."
+	                        aria-label="Search clubs"
+	                      />
+	                    </div>
+	                  </DropdownMenu.Item>
+	                  <div className="menu-scroll" aria-label="Club options">
+	                    <DropdownMenu.RadioGroup value={clubId} onValueChange={setClubId}>
+	                      <DropdownMenu.RadioItem className="menu-item" value="all">
+	                        All clubs
+	                        <DropdownMenu.ItemIndicator>
+	                          <Check size={16} />
+	                        </DropdownMenu.ItemIndicator>
+	                      </DropdownMenu.RadioItem>
+	                      {(clubsQuery.data ?? [])
+	                        .filter((club) => club.shortName !== DISTRICT_CLUB_SHORT_NAME)
+	                        .filter((club) => club.name.toLowerCase().includes(clubQuery.trim().toLowerCase()))
+	                        .map((club) => (
+	                          <DropdownMenu.RadioItem className="menu-item" value={club.id} key={club.id}>
+	                            {club.shortName}
+	                            <DropdownMenu.ItemIndicator>
+	                              <Check size={16} />
+	                            </DropdownMenu.ItemIndicator>
+	                          </DropdownMenu.RadioItem>
+	                        ))}
+	                    </DropdownMenu.RadioGroup>
+	                  </div>
+	                </DropdownMenu.Content>
+	              </DropdownMenu.Portal>
+	            </DropdownMenu.Root>
+	          ) : null}
 
-          {(search || level !== 'all' || clubId !== 'all') && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearch('');
-                setLevel('all');
-                setClubId('all');
-              }}
-            >
-              Reset
-            </Button>
-          )}
+	          {(search || level !== 'all' || clubId !== 'all') && (
+	            <Button
+	              type="button"
+	              variant="ghost"
+	              size="sm"
+	              onClick={() => {
+	                setSearch('');
+	                setLevel('all');
+	                setClubId('all');
+	              }}
+	            >
+	              Reset
+	            </Button>
+	          )}
         </div>
       </Card>
 
@@ -217,4 +228,3 @@ export function AnnouncementsPage() {
     </div>
   );
 }
-

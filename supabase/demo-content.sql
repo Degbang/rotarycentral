@@ -11,7 +11,7 @@
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 
@@ -221,7 +221,7 @@ on conflict (id) do update set
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 insert into public.projects (
@@ -428,7 +428,7 @@ on conflict (id) do update set
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 insert into public.announcements (

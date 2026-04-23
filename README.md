@@ -12,10 +12,10 @@ Private Rotary district workspace for Ghana: clubs, events, and projects behind 
    - `supabase/schema.sql`
    - `supabase/seed.sql`
 3. Create two auth users (Supabase Dashboard → Authentication → Users):
-   - `viewer@districtgh.org` / `DemoPass123`
-   - `staff@districtgh.org` / `DemoPass123`
+   - `viewer@district9104.org` / `DemoPass123`
+   - `staff@district9104.org` / `DemoPass123`
 4. In the SQL editor, query the auth ids:
-   - `select id, email from auth.users where email in ('viewer@districtgh.org','staff@districtgh.org');`
+   - `select id, email from auth.users where email in ('viewer@district9104.org','staff@district9104.org');`
 5. Insert matching rows into `public.profiles` using the example in `supabase/seed.sql`.
 6. Storage (attachments):
    - Create a private bucket named `attachments` (Dashboard → Storage → Buckets).

@@ -107,7 +107,7 @@ export function LoginPage() {
                   className="input-field"
                   type="email"
                   autoComplete="email"
-                  placeholder="name@districtgh.org"
+                  placeholder="name@district9104.org"
                   disabled={isSubmitting}
                   {...register('email')}
                 />

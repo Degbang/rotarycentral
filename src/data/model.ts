@@ -2,6 +2,7 @@ export const RECORD_STATUSES = ['DRAFT', 'SUBMITTED', 'CHANGES_REQUESTED', 'PUBL
 
 export const PROJECT_PROGRESS_STATUSES = ['Planning', 'Active', 'Completed', 'Paused'] as const;
 export const CLUB_TYPES = ['Rotary Club', 'Rotaract Club'] as const;
+export const DISTRICT_CLUB_SHORT_NAME = 'District9104' as const;
 
 export type RecordStatus = (typeof RECORD_STATUSES)[number];
 export type ProjectProgressStatus = (typeof PROJECT_PROGRESS_STATUSES)[number];

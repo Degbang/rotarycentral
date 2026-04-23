@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { ProjectEditorInput } from '@/data/model';
+import { DISTRICT_CLUB_SHORT_NAME, ProjectEditorInput } from '@/data/model';
 import { getProjectById, listClubs, listThemes, saveProject } from '@/data/api';
 import { useAuth } from '@/features/auth';
 import { clubNameIsIncluded, titleUsesRotaryWords } from '@/features/brandRules';
@@ -91,9 +91,12 @@ export function ProjectEditorPage() {
     }
 
     if (!isEditing) {
+      const districtClubId = clubsQuery.data?.find((club) => club.shortName === DISTRICT_CLUB_SHORT_NAME)?.id;
+      const defaultSessionClubId = session.clubIds.find((id) => id && id !== districtClubId) ?? '';
+      const defaultClubId = defaultSessionClubId || clubsQuery.data?.find((club) => club.id !== districtClubId)?.id || '';
       reset({
         ...emptyValues,
-        clubId: session.clubIds[0] ?? clubsQuery.data?.[0]?.id ?? '',
+        clubId: defaultClubId,
         themeId: themesQuery.data?.[0]?.id ?? '',
       });
     }
@@ -136,6 +139,11 @@ export function ProjectEditorPage() {
   }
 
   const values = watch();
+  const districtClub = clubsQuery.data?.find((club) => club.shortName === DISTRICT_CLUB_SHORT_NAME);
+  const districtClubId = districtClub?.id ?? '';
+  const isDistrictLevel = Boolean(districtClubId && values.clubId === districtClubId);
+  const clubOptions =
+    clubsQuery.data?.filter((club) => club.shortName !== DISTRICT_CLUB_SHORT_NAME).map((club) => ({ value: club.id, label: club.name })) ?? [];
 
   function publishBlockerReason(values: ProjectEditorInput): string | null {
     if (!values.title?.trim() || values.title.trim().length < 3) return 'Add a title.';
@@ -216,19 +224,45 @@ export function ProjectEditorPage() {
           </div>
         ) : null}
 
-        {currentStep === 1 ? (
-          <div className="form-stack">
-            <InlineSearchSelectField
-              label="Club"
-              value={values.clubId}
-              onChange={(value) => setValue('clubId', value, { shouldValidate: true })}
-              placeholder="Search clubs (start typing...)"
-              error={errors.clubId?.message}
-              options={(clubsQuery.data ?? []).map((club) => ({ value: club.id, label: club.name }))}
-            />
-            <SelectField
-              label="Theme"
-              value={values.themeId}
+	        {currentStep === 1 ? (
+	          <div className="form-stack">
+	            <SelectField
+	              label="Level"
+	              value={isDistrictLevel ? 'district' : 'club'}
+	              onChange={(value) => {
+	                if (value === 'district') {
+	                  if (!districtClubId) {
+	                    setError('root', { message: 'District club is not configured yet. Add the District9104 club entry in Supabase.' });
+	                    return;
+	                  }
+	                  setValue('clubId', districtClubId, { shouldValidate: true });
+	                  return;
+	                }
+
+	                const fallbackClubId = session.clubIds.find((id) => id && id !== districtClubId) ?? clubOptions[0]?.value ?? '';
+	                setValue('clubId', fallbackClubId, { shouldValidate: true });
+	              }}
+	              placeholder="Choose level"
+	              options={[
+	                { value: 'district', label: 'District' },
+	                { value: 'club', label: 'Club' },
+	              ]}
+	            />
+	            <InlineSearchSelectField
+	              label="Club"
+	              value={values.clubId}
+	              onChange={(value) => setValue('clubId', value, { shouldValidate: true })}
+	              placeholder="Search clubs (start typing...)"
+	              error={errors.clubId?.message}
+	              options={
+	                isDistrictLevel && districtClub
+	                  ? [{ value: districtClub.id, label: districtClub.name }]
+	                  : clubOptions
+	              }
+	            />
+	            <SelectField
+	              label="Theme"
+	              value={values.themeId}
               onChange={(value) => setValue('themeId', value, { shouldValidate: true })}
               placeholder="Choose theme"
               error={errors.themeId?.message}

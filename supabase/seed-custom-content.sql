@@ -17,7 +17,7 @@
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 
@@ -75,7 +75,7 @@ values (
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 insert into public.projects (
@@ -125,7 +125,7 @@ values (
 with staff_user as (
   select id
   from public.profiles
-  where email = 'staff@districtgh.org'
+  where email = 'staff@district9104.org'
   limit 1
 )
 insert into public.announcements (
@@ -144,4 +144,3 @@ values (
   'PUBLISHED',
   (select id from staff_user)
 );
-
