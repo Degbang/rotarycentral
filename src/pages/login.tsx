@@ -47,7 +47,7 @@ export function LoginPage() {
               </div>
               <div className="hero-top-copy">
                 <div className="hero-rotary">Rotary</div>
-                <div className="hero-district">District 9104</div>
+                <div className="hero-district">Digital Hub</div>
               </div>
               <div className="hero-divider" aria-hidden="true" />
               <div className="hero-tagline" aria-label="Service Above Self">
@@ -57,9 +57,9 @@ export function LoginPage() {
 
             <div className="hero-head fade-r-2">
               <h1 className="hero-title">
-                Rotary
+                District 9104
                 <br />
-                District <span className="hero-title-accent">9104</span>
+                <span className="hero-title-accent">Digital Hub</span>
               </h1>
               <div className="hero-bar gold-bar" aria-hidden="true" />
             </div>

@@ -35,8 +35,8 @@ export function AppShell() {
               <img className="brand-logo" src={districtLogo} alt="" />
             </span>
             <div className="brand-copy">
-              <span className="eyebrow">Rotary District 9104</span>
-              <strong>Ghana</strong>
+              <span className="eyebrow">District 9104</span>
+              <strong>Digital Hub</strong>
             </div>
           </button>
           <nav className="topnav" aria-label="Primary">

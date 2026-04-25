@@ -127,6 +127,9 @@ export function AnnouncementsPage() {
 	                        autoFocus
 	                        value={clubQuery}
 	                        onChange={(event) => setClubQuery(event.target.value)}
+	                        onKeyDown={(event) => {
+	                          if (event.key !== 'Escape') event.stopPropagation();
+	                        }}
 	                        placeholder="Search clubs..."
 	                        aria-label="Search clubs"
 	                      />
