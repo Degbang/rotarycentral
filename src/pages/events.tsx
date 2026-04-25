@@ -176,6 +176,9 @@ export function EventsPage() {
 	                        autoFocus
 	                        value={clubQuery}
 	                        onChange={(event) => setClubQuery(event.target.value)}
+	                        onKeyDown={(event) => {
+	                          if (event.key !== 'Escape') event.stopPropagation();
+	                        }}
 	                        placeholder="Search clubs..."
 	                        aria-label="Search clubs"
 	                      />
@@ -226,6 +229,9 @@ export function EventsPage() {
                       autoFocus
                       value={themeQuery}
                       onChange={(event) => setThemeQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key !== 'Escape') event.stopPropagation();
+                      }}
                       placeholder="Search themes..."
                       aria-label="Search themes"
                     />
